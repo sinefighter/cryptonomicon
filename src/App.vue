@@ -162,26 +162,34 @@ export default {
   name: 'App',
   data() {
 	return {
-		ticker: 'default',
-		tickers: [
-			{name: 'DEMO1', price: '-'},
-			{name: 'DEMO2', price: '-'},
-			{name: 'DEMO3', price: '-'},
-			{name: 'DEMO4', price: '-'},
-			{name: 'DEMO5', price: '-'}
-		],
+		ticker: '',
+		tickers: [],
 		sel: null,
+		graph: [],
 	}
   },
 
   methods: {
 	add() {
-		const newTicker = {
+		const currentTicker = {
 			name: this.ticker,
 			price: '-',
 		}
 
-		this.tickers.push(newTicker)
+		this.tickers.push(currentTicker)
+		setInterval(async () => {
+			const f = await fetch(
+				`https://min-api.cryptocompare.com/data/price?fsym=${currentTicker.name}&tsyms=USD&api_key=b5e517f571e45927de9e9774af0c04f257ad7fc932944dde106b9c9d26ad4dc0`
+			)
+			const data = await f.json()
+
+			this.tickers.find(t => t.name === currentTicker.name).price = 
+			data.USD > 1 ? data.USD.toFixed(2) : data.USD.toPrecision(2)
+
+			if(this.sel.name === currentTicker.name) {
+				this.graph.push(data.USD)
+			}
+		}, 3000);
 		this.ticker = ''
 	},
 	handleDelete(tickerToRemove) {
